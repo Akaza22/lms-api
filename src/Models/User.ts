@@ -9,6 +9,7 @@ interface UserAttributes {
   phone?: string;
   profile_image?: string;
   gender: "L" | "P";
+  fullname?: string;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -23,6 +24,7 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public phone?: string;
   public profile_image?: string;
   public gender!: "L" | "P";
+  public fullname?: string;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -59,6 +61,9 @@ User.init(
       validate: {
         isIn: [["L", "P"]],
       },
+    },
+    fullname: {
+      type: DataTypes.STRING(255),
     },
     created_at: {
       type: DataTypes.DATE,

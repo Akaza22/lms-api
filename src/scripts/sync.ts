@@ -18,8 +18,8 @@ const seedDatabase = async () => {
     // Seed Admin User
     const hashedPassword = await bcrypt.hash("12345", 10);
     const admin = await User.create({
-      username: "kadangkiding",
-      email: "admin@example.com",
+      username: "akaza22",
+      email: "akaza@example.com",
       password: hashedPassword,
       gender: "L", // Tambahin gender di User
     });
