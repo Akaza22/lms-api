@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import { User, Role, UserRole } from "../Models";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { successResponse, errorResponse } from "../Utils/response"; 
+import { successResponse, errorResponse } from "../Utils/response";
+import { Op } from "sequelize";
+
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { username, email, password, role, gender } = req.body;
+    const { username, email, password, role, gender, fullname } = req.body;
 
     // Cek apakah email sudah digunakan
     const existingUser = await User.findOne({ where: { email } });
@@ -18,7 +20,13 @@ export const register = async (req: Request, res: Response) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Buat user baru
-    const newUser = await User.create({ username, email, password: hashedPassword, gender });
+    const newUser = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      gender,
+      fullname, // Menambahkan fullname pada pembuatan user
+    });
 
     // Cari role berdasarkan nama
     const selectedRole = await Role.findOne({ where: { name: role } });
@@ -35,6 +43,7 @@ export const register = async (req: Request, res: Response) => {
       name: newUser.username,
       email: newUser.email,
       role: selectedRole.name,
+      fullname: newUser.fullname, // Menambahkan fullname pada response
     }, 201);
   } catch (error) {
     return errorResponse(res, "Terjadi kesalahan saat registrasi", error);
@@ -43,19 +52,26 @@ export const register = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
 
-    // Cari user berdasarkan email
-    const user = await User.findOne({ where: { email } });
+    // Cek apakah email atau username yang digunakan
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email: email || "" },   // Jika email tidak ada, gunakan string kosong
+          { username: username || "" },  // Jika username tidak ada, gunakan string kosong
+        ],
+      },
+    });
 
     if (!user) {
-      return errorResponse(res, "Email atau password salah", null, 401);
+      return errorResponse(res, "Email/Username atau password salah", null, 401);
     }
 
     // Cek password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return errorResponse(res, "Email atau password salah", null, 401);
+      return errorResponse(res, "Email/Username atau password salah", null, 401);
     }
 
     // Ambil role berdasarkan user_id dari tabel user_roles

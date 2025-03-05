@@ -9,7 +9,7 @@ const seedDatabase = async () => {
     console.log("✅ Database synchronized!");
 
     // Seed Roles
-    const roles = ["admins", "teachers"];
+    const roles = ["admins"];
     const roleInstances = await Promise.all(
       roles.map(async (roleName) => await Role.create({ name: roleName }))
     );
@@ -21,13 +21,14 @@ const seedDatabase = async () => {
       username: "akaza22",
       email: "akaza@example.com",
       password: hashedPassword,
-      gender: "L", // Tambahin gender di User
+      gender: "L", // Menambahkan gender di User
+      fullname: "Akaza Admin", // Menambahkan fullname di User
     });
 
     // Cari role "admins"
     const adminRole = await Role.findOne({ where: { name: "admins" } });
     if (adminRole) {
-      await UserRole.create({ user_id: admin.id, role_id: adminRole.id }); // Masukin role admin ke UserRole
+      await UserRole.create({ user_id: admin.id, role_id: adminRole.id }); // Masukkan role admin ke UserRole
     }
 
     console.log("✅ Admin user seeded!");
