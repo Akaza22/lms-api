@@ -9,7 +9,7 @@ const seedDatabase = async () => {
     console.log("✅ Database synchronized!");
 
     // Seed Roles
-    const roles = ["admins"];
+    const roles = ["admins", "teachers", "students", "parents"];
     const roleInstances = await Promise.all(
       roles.map(async (roleName) => await Role.create({ name: roleName }))
     );

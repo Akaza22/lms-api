@@ -12,6 +12,8 @@ interface UserAttributes {
   fullname?: string;
   created_at?: Date;
   updated_at?: Date;
+  reset_password_token?: string;
+  reset_password_expires?: Date;
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
@@ -27,6 +29,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
   public fullname?: string;
   public created_at?: Date;
   public updated_at?: Date;
+  public reset_password_token?: string;
+  public reset_password_expires?: Date;  
 }
 
 User.init(
@@ -73,12 +77,29 @@ User.init(
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
+    reset_password_token: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    },
+    reset_password_expires: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    },
   },
   {
     sequelize,
     modelName: "User",
     tableName: "users",
-    timestamps: false,
+    timestamps: true, // Pastikan Sequelize menangani created_at dan updated_at
+    underscored: true, // Mengubah createdAt -> created_at dan updatedAt -> updated_at
+    hooks: {
+      beforeUpdate: (user) => {
+        user.updated_at = new Date();
+      },
+    },
+    defaultScope: {
+      attributes: { exclude: ["createdAt", "updatedAt"] }, // Hapus field duplikat dari response
+    },
   }
 );
 
